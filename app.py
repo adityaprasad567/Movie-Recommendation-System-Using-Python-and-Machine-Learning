@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 
-# 🔥 CHANGE AFTER DEPLOYMENT
+
 BACKEND_URL = "https://your-backend-name.onrender.com"
 
 st.set_page_config(
@@ -79,11 +79,9 @@ if query:
 
                 if st.button("View", key=movie["imdbID"]):
                     details = requests.get(
-                        f"{BACKEND_URL}/movie",
-                        params={"imdb_id": movie["imdbID"]},
+                        f"{BACKEND_URL}/movie/{movie['imdbID']}",
                         timeout=10,
                     ).json()
-
                     st.markdown("---")
                     st.markdown(
                         f"<h2 style='color:white;'>{details.get('Title')}</h2>",
