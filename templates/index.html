@@ -1,202 +1,498 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Movie Recommender</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #0f0f0f;
-            color: white;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 40px;
-            background: #141414;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        header h1 {
-            color: #E50914;
-            margin: 0;
-        }
-
-        .search-box {
-            display: flex;
-        }
-
-        input {
-            padding: 10px;
-            width: 250px;
-            border: none;
-            outline: none;
-            border-radius: 5px 0 0 5px;
-        }
-
-        button {
-            padding: 10px 15px;
-            border: none;
-            background: #E50914;
-            color: white;
-            cursor: pointer;
-            border-radius: 0 5px 5px 0;
-            font-weight: bold;
-        }
-
-        .movies {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 20px;
-            padding: 40px;
-        }
-
-        .movie-card {
-            position: relative;
-            overflow: hidden;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-        }
-
-        .movie-card:hover {
-            transform: scale(1.08);
-        }
-
-        .movie-card img {
-            width: 100%;
-            border-radius: 10px;
-        }
-
-        .movie-title {
-            text-align: center;
-            margin-top: 8px;
-            font-size: 14px;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.85);
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .modal-content {
-            background: #1c1c1c;
-            padding: 20px;
-            border-radius: 10px;
-            max-width: 700px;
-            width: 100%;
-        }
-
-        .modal img {
-            width: 200px;
-            float: left;
-            margin-right: 20px;
-            border-radius: 10px;
-        }
-
-        .close-btn {
-            float: right;
-            cursor: pointer;
-            color: #E50914;
-            font-size: 20px;
-        }
-
-        @media(max-width: 600px) {
-            .modal img {
-                width: 100%;
-                float: none;
-                margin: 0 0 20px 0;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movie Recommender</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
+<style>
+:root{--red:#E50914;--gold:#f5c518;--bg:#080808;--s1:#111;--s2:#1a1a1a;--txt:#f0ece4;--muted:#666;--border:rgba(255,255,255,0.07)}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);overflow-x:hidden}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.4;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E")}
+/* HEADER */
+header{position:sticky;top:0;z-index:200;height:64px;display:flex;align-items:center;
+  justify-content:space-between;padding:0 48px;
+  background:rgba(8,8,8,.93);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-mark{width:34px;height:34px;background:var(--red);border-radius:8px;display:grid;
+  place-items:center;font-size:17px;box-shadow:0 0 24px rgba(229,9,20,.5)}
+.logo-name{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:var(--txt)}
+.logo-name b{color:var(--red)}
+nav{display:flex;gap:26px}
+nav a{color:rgba(240,236,228,.45);text-decoration:none;font-size:13px;font-weight:500;cursor:pointer;
+  letter-spacing:.4px;transition:color .2s;background:none;border:none;font-family:'DM Sans',sans-serif}
+nav a:hover,nav a.on{color:var(--txt)}
+.hdr-r{display:flex;align-items:center;gap:12px}
+.sw{position:relative;display:flex;align-items:center}
+#si{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;
+  padding:9px 38px 9px 14px;color:var(--txt);font-family:'DM Sans',sans-serif;
+  font-size:13px;width:220px;outline:none;transition:all .3s}
+#si::placeholder{color:rgba(240,236,228,.28)}
+#si:focus{width:255px;background:rgba(255,255,255,.09);border-color:rgba(229,9,20,.5);
+  box-shadow:0 0 0 3px rgba(229,9,20,.11)}
+.si-btn{position:absolute;right:9px;background:none;border:none;color:var(--muted);
+  cursor:pointer;display:grid;place-items:center;transition:color .2s;padding:0}
+.si-btn:hover{color:var(--red)}
+/* HERO */
+.hero{position:relative;height:88vh;min-height:520px;overflow:hidden;display:flex;
+  align-items:flex-end;padding:0 48px 64px}
+.hbg{position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(229,9,20,.17) 0%,transparent 55%),
+  radial-gradient(ellipse 80% 70% at 70% 20%,rgba(229,9,20,.09),transparent 60%),
+  linear-gradient(180deg,#0d0d0d,#050505)}
+.pw{position:absolute;inset:0;display:flex;gap:14px;padding:14px;opacity:.17;overflow:hidden;pointer-events:none}
+.pwc{display:flex;flex-direction:column;gap:14px;flex-shrink:0;width:148px;animation:drift 22s linear infinite}
+.pwc:nth-child(2){animation-duration:28s;animation-delay:-7s}
+.pwc:nth-child(3){animation-duration:20s;animation-delay:-13s}
+.pwc:nth-child(4){animation-duration:32s;animation-delay:-4s}
+.pwc:nth-child(5){animation-duration:18s;animation-delay:-10s}
+.pwc:nth-child(6){animation-duration:25s;animation-delay:-17s}
+@keyframes drift{from{transform:translateY(0)}to{transform:translateY(-50%)}}
+.pwcard{width:148px;height:218px;border-radius:10px;flex-shrink:0;overflow:hidden;background:rgba(255,255,255,.04)}
+.pwcard img{width:100%;height:100%;object-fit:cover}
+.hfb{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 30%,rgba(8,8,8,.7) 65%,var(--bg) 100%)}
+.hfl{position:absolute;inset:0;background:linear-gradient(to right,var(--bg) 0%,rgba(8,8,8,.65) 30%,transparent 55%)}
+.hc{position:relative;z-index:2;max-width:580px}
+.hpill{display:inline-flex;align-items:center;gap:8px;background:rgba(229,9,20,.14);
+  border:1px solid rgba(229,9,20,.3);border-radius:100px;padding:5px 16px;font-size:11px;
+  font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:#ff7070;margin-bottom:22px;
+  animation:up .6s ease both}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--red);animation:blink 1.4s ease infinite}
+@keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+h1.ht{font-family:'Bebas Neue',sans-serif;font-size:clamp(56px,8vw,100px);letter-spacing:4px;
+  line-height:.92;margin-bottom:18px;animation:up .6s .1s ease both}
+h1.ht em{font-family:'Playfair Display',serif;color:var(--red);font-style:italic}
+.hd{font-size:15px;color:rgba(240,236,228,.48);max-width:400px;line-height:1.7;
+  margin-bottom:36px;animation:up .6s .2s ease both}
+.hbtns{display:flex;gap:12px;animation:up .6s .3s ease both}
+@keyframes up{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:8px;
+  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .25s}
+.bred{background:var(--red);color:#fff;box-shadow:0 4px 28px rgba(229,9,20,.42)}
+.bred:hover{background:#f01020;transform:translateY(-2px);box-shadow:0 8px 36px rgba(229,9,20,.52)}
+.bgl{background:rgba(255,255,255,.07);color:var(--txt);border:1px solid rgba(255,255,255,.12)}
+.bgl:hover{background:rgba(255,255,255,.13);transform:translateY(-2px)}
+/* GENRE STRIP */
+.gstrip{display:flex;gap:10px;padding:26px 48px;overflow-x:auto;border-bottom:1px solid var(--border)}
+.gstrip::-webkit-scrollbar{display:none}
+.gbtn{flex-shrink:0;padding:8px 20px;border-radius:100px;font-size:12px;font-weight:600;
+  letter-spacing:.5px;cursor:pointer;border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.05);color:rgba(240,236,228,.55);transition:all .2s;text-transform:uppercase}
+.gbtn:hover,.gbtn.active{background:var(--red);border-color:var(--red);color:#fff;box-shadow:0 0 18px rgba(229,9,20,.32)}
+/* SECTIONS */
+.sec{padding:44px 48px 0}
+.sh{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:26px}
+.st{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--txt)}
+.st span{color:var(--red);margin-right:5px}
+.sm{font-size:12px;color:var(--red);cursor:pointer;display:flex;align-items:center;gap:4px;
+  transition:gap .2s;background:none;border:none;font-family:'DM Sans',sans-serif;font-weight:600}
+.sm:hover{gap:8px}
+/* FEATURED */
+.fg{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
+.fc{position:relative;border-radius:14px;overflow:hidden;cursor:pointer;height:195px;
+  background:var(--s2);transition:transform .3s,box-shadow .3s}
+.fc:hover{transform:translateY(-4px);box-shadow:0 24px 56px rgba(0,0,0,.6)}
+.fc img{width:100%;height:100%;object-fit:cover;opacity:.5;transition:opacity .3s}
+.fc:hover img{opacity:.68}
+.fo{position:absolute;inset:0;background:linear-gradient(135deg,rgba(8,8,8,.95) 0%,transparent 65%);
+  padding:22px;display:flex;flex-direction:column;justify-content:flex-end}
+.fgen{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--red);margin-bottom:5px}
+.ftit{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;margin-bottom:5px;line-height:1}
+.fmeta{display:flex;align-items:center;gap:10px;font-size:12px;color:rgba(240,236,228,.48)}
+.frat{color:var(--gold);font-weight:600}
+/* MOVIE GRID */
+.mg{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:15px}
+/* MOVIE CARD */
+.mc{position:relative;border-radius:12px;overflow:hidden;cursor:pointer;background:var(--s2);
+  aspect-ratio:2/3;transition:transform .35s cubic-bezier(.25,.46,.45,.94),box-shadow .35s}
+.mc::before{content:'';position:absolute;inset:0;border-radius:12px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);z-index:3;pointer-events:none;transition:box-shadow .3s}
+.mc:hover{transform:scale(1.06) translateY(-5px);box-shadow:0 28px 64px rgba(0,0,0,.7)}
+.mc:hover::before{box-shadow:inset 0 0 0 1.5px rgba(229,9,20,.4)}
+.mc img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s}
+.mc:hover img{transform:scale(1.05)}
+.co{position:absolute;inset:0;z-index:2;background:linear-gradient(to top,rgba(8,8,8,.97) 0%,rgba(8,8,8,.5) 40%,transparent 70%);
+  opacity:0;transition:opacity .3s;display:flex;flex-direction:column;justify-content:flex-end;padding:13px 11px}
+.mc:hover .co{opacity:1}
+.ct{font-size:12px;font-weight:600;line-height:1.35;margin-bottom:5px}
+.cm{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted)}
+.cr{color:var(--gold);font-weight:700;display:flex;align-items:center;gap:2px}
+.pb{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(.65);width:50px;height:50px;
+  border-radius:50%;background:rgba(229,9,20,.9);display:grid;place-items:center;opacity:0;z-index:4;
+  transition:all .3s;box-shadow:0 0 30px rgba(229,9,20,.6)}
+.mc:hover .pb{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.rn{position:absolute;bottom:-8px;left:-3px;z-index:1;font-family:'Bebas Neue',sans-serif;
+  font-size:90px;line-height:1;color:transparent;-webkit-text-stroke:2px rgba(255,255,255,.09);
+  pointer-events:none;transition:-webkit-text-stroke .3s}
+.mc:hover .rn{-webkit-text-stroke-color:rgba(229,9,20,.28)}
+.cb{position:absolute;top:10px;left:10px;z-index:5;font-size:9px;font-weight:700;
+  letter-spacing:1px;text-transform:uppercase;padding:3px 9px;border-radius:5px;color:#fff}
+.cb.top{background:#f5c518;color:#111}
+.cb.new{background:#00c573}
+/* MODAL */
+.mbg{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.88);
+  backdrop-filter:blur(10px);justify-content:center;align-items:center;padding:20px;animation:fi .2s ease}
+.mbg.open{display:flex}
+@keyframes fi{from{opacity:0}to{opacity:1}}
+.mbox{background:var(--s1);border-radius:18px;width:100%;max-width:780px;max-height:92vh;
+  overflow-y:auto;position:relative;border:1px solid rgba(255,255,255,.07);
+  box-shadow:0 50px 100px rgba(0,0,0,.85);animation:pi .32s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes pi{from{opacity:0;transform:translateY(36px) scale(.96)}to{opacity:1;transform:none}}
+.mh{position:relative;height:270px;overflow:hidden;border-radius:18px 18px 0 0}
+.mhbi{position:absolute;inset:0;background-size:cover;background-position:center;filter:blur(2px);transform:scale(1.06)}
+.mhg{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(17,17,17,.15) 0%,rgba(17,17,17,.9) 75%,var(--s1) 100%)}
+.mhp{position:absolute;bottom:-34px;left:32px;width:112px;border-radius:10px;
+  box-shadow:0 20px 50px rgba(0,0,0,.7);border:2px solid rgba(255,255,255,.1)}
+.mcl{position:absolute;top:14px;right:14px;z-index:10;width:36px;height:36px;border-radius:50%;
+  background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.12);color:#fff;font-size:18px;
+  cursor:pointer;display:grid;place-items:center;transition:all .25s}
+.mcl:hover{background:var(--red);transform:rotate(90deg)}
+.mb{padding:52px 32px 32px 166px}
+.mtit{font-family:'Bebas Neue',sans-serif;font-size:38px;letter-spacing:2px;line-height:1;margin-bottom:11px}
+.mchips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:5px 13px;border-radius:100px;
+  font-size:12px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);color:rgba(240,236,228,.65)}
+.chip.gd{background:rgba(245,197,24,.1);border-color:rgba(245,197,24,.25);color:var(--gold);font-weight:700}
+.mgens{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.gtag{padding:5px 13px;border-radius:100px;font-size:11px;font-weight:600;letter-spacing:.4px;
+  text-transform:uppercase;background:rgba(229,9,20,.1);border:1px solid rgba(229,9,20,.25);color:#ff8888}
+.mplot{font-size:14px;line-height:1.8;color:rgba(240,236,228,.58);margin-bottom:24px}
+.cast-l{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+.cast-w{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px}
+.cc{padding:5px 13px;border-radius:8px;background:var(--s2);border:1px solid var(--border);font-size:12px;color:rgba(240,236,228,.65)}
+.mact{display:flex;gap:11px}
+/* TOAST */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(16px);
+  background:var(--s2);border:1px solid var(--border);border-radius:10px;
+  padding:11px 22px;font-size:13px;opacity:0;transition:all .3s;z-index:5000;
+  pointer-events:none;white-space:nowrap;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* FOOTER */
+footer{margin-top:70px;padding:30px 48px;border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between}
+.fl{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;color:rgba(240,236,228,.17)}
+.fl b{color:rgba(229,9,20,.4)}
+footer p{font-size:12px;color:rgba(240,236,228,.18)}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:rgba(229,9,20,.4);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--red)}
+@media(max-width:768px){
+  header{padding:0 18px}nav{display:none}
+  .hero{padding:0 18px 42px;height:auto;min-height:400px}
+  .gstrip{padding:18px}.sec{padding:28px 18px 0}
+  .mg{grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:11px}
+  .fg{grid-template-columns:1fr}.mb{padding:46px 18px 22px 18px}.mhp{display:none}
+  footer{flex-direction:column;gap:10px;text-align:center;padding:22px 18px}
+}
+</style>
 </head>
-
 <body>
 
 <header>
-    <h1>🎬 Movie Recommender</h1>
-    <div class="search-box">
-        <input type="text" id="searchInput" placeholder="Search movies...">
-        <button onclick="searchMovie()">Search</button>
+  <a class="logo" href="#">
+    <div class="logo-mark">🎬</div>
+    <span class="logo-name">Cine<b>Vault</b></span>
+  </a>
+  <nav>
+    <a class="on" onclick="showAll(this)">Discover</a>
+    <a onclick="showTop(this)">Top Rated</a>
+    <a onclick="showNew(this)">New Releases</a>
+    <a onclick="filterG('Action',this)">Action</a>
+    <a onclick="filterG('Drama',this)">Drama</a>
+  </nav>
+  <div class="hdr-r">
+    <div class="sw">
+      <input type="text" id="si" placeholder="Search movies…" oninput="lsearch(this.value)">
+      <button class="si-btn">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </button>
     </div>
+  </div>
 </header>
 
-<div class="movies" id="results"></div>
-
-<div class="modal" id="movieModal">
-    <div class="modal-content">
-        <span class="close-btn" onclick="closeModal()">✖</span>
-        <div id="modalBody"></div>
+<section class="hero">
+  <div class="hbg"></div>
+  <div class="pw" id="pw"></div>
+  <div class="hfb"></div>
+  <div class="hfl"></div>
+  <div class="hc">
+    <div class="hpill"><span class="dot"></span>Now Trending</div>
+    <h1 class="ht">Find Your<br>Next<br><em>Obsession</em></h1>
+    <p class="hd">Thousands of handpicked films across every genre. Discover what the world is watching.</p>
+    <div class="hbtns">
+      <button class="btn bred" onclick="document.getElementById('ms').scrollIntoView({behavior:'smooth'})">
+        <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        Browse Films
+      </button>
+      <button class="btn bgl" onclick="openRandom()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Surprise Me
+      </button>
     </div>
+  </div>
+</section>
+
+<div class="gstrip" id="gs"></div>
+
+<section class="sec">
+  <div class="sh"><h2 class="st"><span>◈</span>EDITOR'S PICKS</h2><button class="sm">View all →</button></div>
+  <div class="fg" id="fg"></div>
+</section>
+
+<section class="sec" id="ms">
+  <div class="sh"><h2 class="st" id="ml"><span>◈</span>TRENDING NOW</h2><button class="sm">View all →</button></div>
+  <div class="mg" id="mg"></div>
+</section>
+
+<section class="sec">
+  <div class="sh"><h2 class="st"><span>◈</span>TOP RATED</h2><button class="sm">View all →</button></div>
+  <div class="mg" id="tg"></div>
+</section>
+
+<footer>
+  <div class="fl">Cine<b>Vault</b></div>
+  <p>© 2025 CineVault · Demo Frontend</p>
+</footer>
+
+<div class="mbg" id="modal">
+  <div class="mbox" id="mbox">
+    <button class="mcl" onclick="closeModal()">✕</button>
+    <div id="mc2"></div>
+  </div>
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
+const M=[
+  {id:1,t:"Inception",y:2010,r:8.8,g:["Sci-Fi","Thriller"],rt:"148 min",
+   plot:"A thief who steals corporate secrets through dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
+   cast:["Leonardo DiCaprio","Joseph Gordon-Levitt","Elliot Page","Tom Hardy"],badge:"top",
+   p:"https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg"},
+  {id:2,t:"The Dark Knight",y:2008,r:9.0,g:["Action","Drama"],rt:"152 min",
+   plot:"When the Joker wreaks havoc on Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
+   cast:["Christian Bale","Heath Ledger","Aaron Eckhart","Michael Caine"],badge:"top",
+   p:"https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_SX300.jpg"},
+  {id:3,t:"Interstellar",y:2014,r:8.7,g:["Sci-Fi","Adventure"],rt:"169 min",
+   plot:"A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival as Earth faces extinction.",
+   cast:["Matthew McConaughey","Anne Hathaway","Jessica Chastain","Michael Caine"],badge:"",
+   p:"https://m.media-amazon.com/images/M/MV5BZjdkOTU3MDktN2IxOS00OGEyLWFmMjktY2FiMmZkNWIyODZiXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_SX300.jpg"},
+  {id:4,t:"Parasite",y:2019,r:8.5,g:["Drama","Thriller"],rt:"132 min",
+   plot:"Greed and class discrimination threaten the symbiotic relationship between the wealthy Park family and the destitute Kim clan.",
+   cast:["Song Kang-ho","Lee Sun-kyun","Cho Yeo-jeong","Choi Woo-shik"],badge:"top",
+   p:"https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_SX300.jpg"},
+  {id:5,t:"The Shawshank Redemption",y:1994,r:9.3,g:["Drama"],rt:"142 min",
+   plot:"Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
+   cast:["Tim Robbins","Morgan Freeman","Bob Gunton","William Sadler"],badge:"top",
+   p:"https://m.media-amazon.com/images/M/MV5BNDE3ODcxYzMtY2YzZC00NiY2LTg3Y2ItZjQxZGZmNmUxNjZhXkEyXkFqcGdeQXVyNjAwNDUxODI@._V1_SX300.jpg"},
+  {id:6,t:"Pulp Fiction",y:1994,r:8.9,g:["Crime","Drama"],rt:"154 min",
+   plot:"The lives of two mob hitmen, a boxer, a gangster and his wife intertwine in four tales of violence and redemption.",
+   cast:["John Travolta","Uma Thurman","Samuel L. Jackson","Bruce Willis"],badge:"",
+   p:"https://m.media-amazon.com/images/M/MV5BNGNhMDIzZTUtNTBlZi00MTRlLWFjM2ItYzViMjE3YzI5MjljXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_SX300.jpg"},
+  {id:7,t:"Avengers: Endgame",y:2019,r:8.4,g:["Action","Sci-Fi"],rt:"181 min",
+   plot:"After the devastating events of Infinity War, the Avengers assemble once more to reverse Thanos's actions and restore balance to the universe.",
+   cast:["Robert Downey Jr.","Chris Evans","Mark Ruffalo","Chris Hemsworth"],badge:"",
+   p:"https://m.media-amazon.com/images/M/MV5BMTc5MDE2ODcwNV5BMl5BanBnXkFtZTgwMzI2NzQ2NzM@._V1_SX300.jpg"},
+  {id:8,t:"The Godfather",y:1972,r:9.2,g:["Crime","Drama"],rt:"175 min",
+   plot:"An organized crime dynasty's aging patriarch transfers control of his clandestine empire to his reluctant son.",
+   cast:["Marlon Brando","Al Pacino","James Caan","Diane Keaton"],badge:"top",
+   p:"https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_SX300.jpg"},
+  {id:9,t:"Oppenheimer",y:2023,r:8.5,g:["Drama","History"],rt:"180 min",
+   plot:"The story of J. Robert Oppenheimer and his role in the development of the atomic bomb during World War II.",
+   cast:["Cillian Murphy","Emily Blunt","Matt Damon","Robert Downey Jr."],badge:"new",
+   p:"https://m.media-amazon.com/images/M/MV5BMDBmYTZjNjUtN2M1MS00MTQ2LTk2ODgtNzc2M2QyZGE5NTVjXkEyXkFqcGdeQXVyNzAwMjU2MTY@._V1_SX300.jpg"},
+  {id:10,t:"Dune",y:2021,r:8.0,g:["Sci-Fi","Adventure"],rt:"155 min",
+   plot:"The son of a noble family is entrusted with the protection of the most valuable asset in the galaxy on the desert planet Arrakis.",
+   cast:["Timothée Chalamet","Rebecca Ferguson","Zendaya","Oscar Isaac"],badge:"new",
+   p:"https://m.media-amazon.com/images/M/MV5BN2FjNmEyNWMtYzM0ZS00NjIyLTg5YzYtYThlMGVjNzE1OGViXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_SX300.jpg"},
+  {id:11,t:"The Matrix",y:1999,r:8.7,g:["Sci-Fi","Action"],rt:"136 min",
+   plot:"A computer hacker learns that reality as he knows it is a simulation controlled by machines, and joins a rebellion to break free.",
+   cast:["Keanu Reeves","Laurence Fishburne","Carrie-Anne Moss","Hugo Weaving"],badge:"",
+   p:"https://m.media-amazon.com/images/M/MV5BNzQzOTk3OTAtNDQ0Zi00ZTVlLTM5YTctZjZiM2ZiNGViZWIzXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg"},
+  {id:12,t:"Whiplash",y:2014,r:8.5,g:["Drama","Music"],rt:"107 min",
+   plot:"A promising young drummer enrolls at a cut-throat music conservatory where an instructor will stop at nothing to realize a student's potential.",
+   cast:["Miles Teller","J.K. Simmons","Melissa Benoist","Paul Reiser"],badge:"",
+   p:"https://m.media-amazon.com/images/M/MV5BOTA5NDZlZGUtMjAxOS00YTRkLTkwYmMtYWQ0NWEwZDZiNjEzXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_SX300.jpg"},
+  {id:13,t:"Joker",y:2019,r:8.4,g:["Crime","Drama"],rt:"122 min",
+   plot:"In Gotham City, mentally troubled comedian Arthur Fleck embarks on a downward spiral of revolution and bloody crime.",
+   cast:["Joaquin Phoenix","Robert De Niro","Zazie Beetz","Frances Conroy"],badge:"",
+   p:"https://m.media-amazon.com/images/M/MV5BNGVjNWI4ZGUtNzE0MS00YTJmLWE0ZDctN2ZiYTk2YmI3NTYyXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_SX300.jpg"},
+  {id:14,t:"Barbie",y:2023,r:6.9,g:["Comedy","Fantasy"],rt:"114 min",
+   plot:"Barbie and Ken are living perfect lives in Barbie Land until a chance to go to the real world turns everything upside down.",
+   cast:["Margot Robbie","Ryan Gosling","America Ferrera","Kate McKinnon"],badge:"new",
+   p:"https://m.media-amazon.com/images/M/MV5BNjU3N2QxNzYtMjk1NC00MTc4LTk1NTQtMmUxNTljM2I0NDA5XkEyXkFqcGdeQXVyODE5NzE3OTE@._V1_SX300.jpg"},
+  {id:15,t:"Spider-Man: No Way Home",y:2021,r:8.2,g:["Action","Sci-Fi"],rt:"148 min",
+   plot:"With Spider-Man's identity revealed, Peter asks Doctor Strange for help. When a spell goes wrong, dangerous foes from other worlds appear.",
+   cast:["Tom Holland","Zendaya","Benedict Cumberbatch","Jacob Batalon"],badge:"",
+   p:"https://m.media-amazon.com/images/M/MV5BZWMyYzFjYTYtNTRjYi00OGExLWE2YzgtOGRmYjAxZTU3NzBiXkEyXkFqcGdeQXVyMzQ0MzA0NTM@._V1_SX300.jpg"},
+  {id:16,t:"Everything Everywhere All at Once",y:2022,r:7.8,g:["Sci-Fi","Comedy"],rt:"139 min",
+   plot:"A middle-aged Chinese immigrant must explore other universes and connect with the lives she could have lived to save existence itself.",
+   cast:["Michelle Yeoh","Stephanie Hsu","Ke Huy Quan","Jamie Lee Curtis"],badge:"new",
+   p:"https://m.media-amazon.com/images/M/MV5BYTdiOTIyZTQtNmQ1OS00NjZlLWIyMTgtYzk5Y2M3ZDVmMDk1XkEyXkFqcGdeQXVyMTAzMDg4NzU0._V1_SX300.jpg"},
+];
+const GENRES=["All","Action","Drama","Sci-Fi","Thriller","Crime","Comedy","Adventure","History","Fantasy","Music"];
+const FT=[1,4,9,8];
+let WL=new Set();
 
-async function loadPopular() {
-    let res = await fetch("/popular");
-    let data = await res.json();
-    displayMovies(data);
+function init(){
+  buildPW();buildGS();buildFeat();
+  render(M,'mg');
+  render([...M].sort((a,b)=>b.r-a.r).slice(0,8),'tg');
 }
 
-async function searchMovie() {
-    let query = document.getElementById("searchInput").value;
-    if (!query) return;
-    let res = await fetch(`/search?query=${query}`);
-    let data = await res.json();
-    displayMovies(data);
-}
-
-function displayMovies(movies) {
-    let resultsDiv = document.getElementById("results");
-    resultsDiv.innerHTML = "";
-
-    movies.forEach(movie => {
-        if (movie.Poster !== "N/A") {
-            resultsDiv.innerHTML += `
-                <div class="movie-card" onclick="loadDetails('${movie.imdbID}')">
-                    <img src="${movie.Poster}">
-                    <div class="movie-title">${movie.Title}</div>
-                </div>
-            `;
-        }
+function buildPW(){
+  const w=document.getElementById('pw');
+  for(let c=0;c<6;c++){
+    const col=document.createElement('div');col.className='pwc';
+    const items=[...M,...M].slice(0,8);
+    items.forEach(m=>{
+      const d=document.createElement('div');d.className='pwcard';
+      d.innerHTML=`<img src="${m.p}" loading="lazy">`;col.appendChild(d);
     });
+    col.innerHTML+=col.innerHTML;w.appendChild(col);
+  }
 }
 
-async function loadDetails(imdbID) {
-    let res = await fetch(`/movie/${imdbID}`);
-    let movie = await res.json();
-
-    let modalBody = document.getElementById("modalBody");
-
-    modalBody.innerHTML = `
-        <img src="${movie.Poster}">
-        <h2>${movie.Title}</h2>
-        <p><b>Year:</b> ${movie.Year}</p>
-        <p><b>Genre:</b> ${movie.Genre}</p>
-        <p><b>IMDB Rating:</b> ⭐ ${movie.imdbRating}</p>
-        <p>${movie.Plot}</p>
-    `;
-
-    document.getElementById("movieModal").style.display = "flex";
+function buildGS(){
+  const s=document.getElementById('gs');
+  GENRES.forEach(g=>{
+    const b=document.createElement('button');b.className='gbtn'+(g==='All'?' active':'');
+    b.textContent=g;
+    b.onclick=()=>{
+      document.querySelectorAll('.gbtn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');filterG(g);
+    };
+    s.appendChild(b);
+  });
 }
 
-function closeModal() {
-    document.getElementById("movieModal").style.display = "none";
+function buildFeat(){
+  const g=document.getElementById('fg');
+  FT.forEach(id=>{
+    const m=M.find(x=>x.id===id);if(!m)return;
+    const d=document.createElement('div');d.className='fc';d.onclick=()=>openM(m);
+    d.innerHTML=`<img src="${m.p}" loading="lazy">
+      <div class="fo">
+        <div class="fgen">${m.g[0]}</div>
+        <div class="ftit">${m.t}</div>
+        <div class="fmeta"><span>${m.y}</span><span class="frat">⭐ ${m.r}</span><span>${m.rt}</span></div>
+      </div>`;
+    g.appendChild(d);
+  });
 }
 
-window.onload = loadPopular;
+function render(movies,cid){
+  const g=document.getElementById(cid);g.innerHTML='';
+  if(!movies.length){
+    g.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--muted)">
+      <div style="font-size:44px;opacity:.35;margin-bottom:10px">🎞️</div>
+      <div style="font-family:'Bebas Neue';font-size:20px;letter-spacing:2px;color:rgba(240,236,228,.2)">No movies found</div></div>`;
+    return;
+  }
+  movies.forEach((m,i)=>{
+    const d=document.createElement('div');d.className='mc';
+    d.style.cssText='opacity:0;transform:translateY(14px)';
+    d.onclick=()=>openM(m);
+    d.innerHTML=`
+      <img src="${m.p}" loading="lazy">
+      <div class="pb"><svg width="15" height="15" fill="white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+      <div class="co"><div class="ct">${m.t}</div>
+        <div class="cm"><span>${m.y}</span><span class="cr">⭐ ${m.r}</span></div></div>
+      ${i<5?`<div class="rn">${i+1}</div>`:''}
+      ${m.badge?`<div class="cb ${m.badge}">${m.badge==='new'?'🆕 New':'🏆 Top'}</div>`:''}`;
+    g.appendChild(d);
+    setTimeout(()=>{d.style.cssText='opacity:1;transform:translateY(0);transition:opacity .4s,transform .4s'},i*42);
+  });
+}
 
+function filterG(genre,navEl){
+  document.getElementById('ml').innerHTML=`<span>◈</span>${genre==='All'?'TRENDING NOW':genre.toUpperCase()+' MOVIES'}`;
+  const res=genre==='All'?M:M.filter(m=>m.g.includes(genre));
+  render(res,'mg');
+  document.getElementById('ms').scrollIntoView({behavior:'smooth'});
+  showToast(`${res.length} ${genre==='All'?'movies':genre} movies`);
+}
+
+function lsearch(q){
+  q=q.trim().toLowerCase();
+  if(!q){render(M,'mg');document.getElementById('ml').innerHTML='<span>◈</span>TRENDING NOW';return;}
+  const res=M.filter(m=>m.t.toLowerCase().includes(q)||m.g.some(x=>x.toLowerCase().includes(q))||m.y.toString().includes(q));
+  document.getElementById('ml').innerHTML=`<span>◈</span>RESULTS FOR "${q.toUpperCase()}"`;
+  render(res,'mg');
+  document.getElementById('ms').scrollIntoView({behavior:'smooth'});
+}
+
+function openM(m){
+  document.getElementById('mc2').innerHTML=`
+    <div class="mh">
+      <div class="mhbi" style="background-image:url('${m.p}')"></div>
+      <div class="mhg"></div>
+      <img class="mhp" src="${m.p}">
+    </div>
+    <div class="mb">
+      <h2 class="mtit">${m.t}</h2>
+      <div class="mchips">
+        <span class="chip">📅 ${m.y}</span>
+        <span class="chip gd">⭐ ${m.r} / 10</span>
+        <span class="chip">⏱ ${m.rt}</span>
+      </div>
+      <div class="mgens">${m.g.map(x=>`<span class="gtag">${x}</span>`).join('')}</div>
+      <p class="mplot">${m.plot}</p>
+      <div class="cast-l">Cast</div>
+      <div class="cast-w">${m.cast.map(c=>`<span class="cc">${c}</span>`).join('')}</div>
+      <div class="mact">
+        <button class="btn bred">
+          <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Watch Now
+        </button>
+        <button class="btn bgl" id="wlb-${m.id}" onclick="toggleWL(${m.id},'${m.t.replace(/'/g,"\\'")}')">
+          ${WL.has(m.id)?'✓ Saved':'+ Watchlist'}
+        </button>
+        <button class="btn bgl" onclick="closeModal()">Close</button>
+      </div>
+    </div>`;
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeModal(){
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+document.getElementById('modal').addEventListener('click',e=>{
+  if(e.target===document.getElementById('modal'))closeModal();
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+function toggleWL(id,title){
+  WL.has(id)?WL.delete(id):WL.add(id);
+  const b=document.getElementById(`wlb-${id}`);
+  if(b)b.textContent=WL.has(id)?'✓ Saved':'+ Watchlist';
+  showToast(WL.has(id)?`Added "${title}" 🎬`:`Removed "${title}"`);
+}
+
+function openRandom(){
+  const m=M[Math.floor(Math.random()*M.length)];
+  openM(m);showToast(`🎲 Random: ${m.t}`);
+}
+
+function showAll(el){setNav(el);render(M,'mg');document.getElementById('ml').innerHTML='<span>◈</span>TRENDING NOW';document.getElementById('ms').scrollIntoView({behavior:'smooth'});}
+function showTop(el){setNav(el);const s=[...M].sort((a,b)=>b.r-a.r);document.getElementById('ml').innerHTML='<span>◈</span>TOP RATED';render(s,'mg');document.getElementById('ms').scrollIntoView({behavior:'smooth'});}
+function showNew(el){setNav(el);const n=M.filter(m=>m.badge==='new');document.getElementById('ml').innerHTML='<span>◈</span>NEW RELEASES';render(n,'mg');document.getElementById('ms').scrollIntoView({behavior:'smooth'});}
+function setNav(el){document.querySelectorAll('nav a').forEach(a=>a.classList.remove('on'));if(el)el.classList.add('on');}
+
+let tt;
+function showToast(msg){
+  const e=document.getElementById('toast');e.textContent=msg;e.classList.add('show');
+  clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('show'),2600);
+}
+
+window.onload=init;
 </script>
-
 </body>
 </html>
