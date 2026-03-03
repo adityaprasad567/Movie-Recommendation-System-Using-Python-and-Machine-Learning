@@ -7,9 +7,8 @@ This project recommends movies based on content similarity and provides movie de
 🚀 Live Demo
 
 👉 Deployed on Render
-([Replace with your live URL](https://movie-recommendation-system-using-python.onrender.com/))
+https://movie-recommendation-system-using-python.onrender.com/
 
-[https://your-app-name.onrender.com](https://movie-recommendation-system-using-python.onrender.com/)
 📌 Features
 
 🔎 Search Movies
