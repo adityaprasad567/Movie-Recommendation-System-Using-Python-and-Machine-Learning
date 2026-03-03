@@ -2,60 +2,200 @@
 <html>
 <head>
     <title>Movie Recommender</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
-            background-color: #141414;
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #0f0f0f;
             color: white;
-            font-family: Arial;
         }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background: #141414;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        header h1 {
+            color: #E50914;
+            margin: 0;
+        }
+
+        .search-box {
+            display: flex;
+        }
+
+        input {
+            padding: 10px;
+            width: 250px;
+            border: none;
+            outline: none;
+            border-radius: 5px 0 0 5px;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: none;
+            background: #E50914;
+            color: white;
+            cursor: pointer;
+            border-radius: 0 5px 5px 0;
+            font-weight: bold;
+        }
+
+        .movies {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+            padding: 40px;
+        }
+
         .movie-card {
-            width: 200px;
-            margin: 10px;
-            display: inline-block;
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
         }
-        img {
+
+        .movie-card:hover {
+            transform: scale(1.08);
+        }
+
+        .movie-card img {
             width: 100%;
             border-radius: 10px;
         }
-        input {
-            padding: 10px;
-            width: 300px;
+
+        .movie-title {
+            text-align: center;
+            margin-top: 8px;
+            font-size: 14px;
         }
-        button {
-            padding: 10px;
-            background-color: #E50914;
-            color: white;
-            border: none;
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: #1c1c1c;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 700px;
+            width: 100%;
+        }
+
+        .modal img {
+            width: 200px;
+            float: left;
+            margin-right: 20px;
+            border-radius: 10px;
+        }
+
+        .close-btn {
+            float: right;
+            cursor: pointer;
+            color: #E50914;
+            font-size: 20px;
+        }
+
+        @media(max-width: 600px) {
+            .modal img {
+                width: 100%;
+                float: none;
+                margin: 0 0 20px 0;
+            }
         }
     </style>
 </head>
+
 <body>
 
-<h1 style="color:#E50914;">🎬 Movie Recommender</h1>
+<header>
+    <h1>🎬 Movie Recommender</h1>
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search movies...">
+        <button onclick="searchMovie()">Search</button>
+    </div>
+</header>
 
-<input type="text" id="searchInput" placeholder="Search movie">
-<button onclick="searchMovie()">Search</button>
+<div class="movies" id="results"></div>
 
-<div id="results"></div>
+<div class="modal" id="movieModal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()">✖</span>
+        <div id="modalBody"></div>
+    </div>
+</div>
 
 <script>
+
+async function loadPopular() {
+    let res = await fetch("/popular");
+    let data = await res.json();
+    displayMovies(data);
+}
+
 async function searchMovie() {
     let query = document.getElementById("searchInput").value;
+    if (!query) return;
     let res = await fetch(`/search?query=${query}`);
     let data = await res.json();
+    displayMovies(data);
+}
 
+function displayMovies(movies) {
     let resultsDiv = document.getElementById("results");
     resultsDiv.innerHTML = "";
 
-    data.forEach(movie => {
-        resultsDiv.innerHTML += `
-            <div class="movie-card">
-                <img src="${movie.Poster}" />
-                <p>${movie.Title}</p>
-            </div>
-        `;
+    movies.forEach(movie => {
+        if (movie.Poster !== "N/A") {
+            resultsDiv.innerHTML += `
+                <div class="movie-card" onclick="loadDetails('${movie.imdbID}')">
+                    <img src="${movie.Poster}">
+                    <div class="movie-title">${movie.Title}</div>
+                </div>
+            `;
+        }
     });
 }
+
+async function loadDetails(imdbID) {
+    let res = await fetch(`/movie/${imdbID}`);
+    let movie = await res.json();
+
+    let modalBody = document.getElementById("modalBody");
+
+    modalBody.innerHTML = `
+        <img src="${movie.Poster}">
+        <h2>${movie.Title}</h2>
+        <p><b>Year:</b> ${movie.Year}</p>
+        <p><b>Genre:</b> ${movie.Genre}</p>
+        <p><b>IMDB Rating:</b> ⭐ ${movie.imdbRating}</p>
+        <p>${movie.Plot}</p>
+    `;
+
+    document.getElementById("movieModal").style.display = "flex";
+}
+
+function closeModal() {
+    document.getElementById("movieModal").style.display = "none";
+}
+
+window.onload = loadPopular;
+
 </script>
 
 </body>
