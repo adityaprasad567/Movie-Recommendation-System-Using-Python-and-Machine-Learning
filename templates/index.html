@@ -3,496 +3,1231 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Movie Recommender</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
+<title>Movie Recommendation</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
 <style>
-:root{--red:#E50914;--gold:#f5c518;--bg:#080808;--s1:#111;--s2:#1a1a1a;--txt:#f0ece4;--muted:#666;--border:rgba(255,255,255,0.07)}
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);overflow-x:hidden}
-body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.4;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E")}
-/* HEADER */
-header{position:sticky;top:0;z-index:200;height:64px;display:flex;align-items:center;
-  justify-content:space-between;padding:0 48px;
-  background:rgba(8,8,8,.93);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
-.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-.logo-mark{width:34px;height:34px;background:var(--red);border-radius:8px;display:grid;
-  place-items:center;font-size:17px;box-shadow:0 0 24px rgba(229,9,20,.5)}
-.logo-name{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:var(--txt)}
-.logo-name b{color:var(--red)}
-nav{display:flex;gap:26px}
-nav a{color:rgba(240,236,228,.45);text-decoration:none;font-size:13px;font-weight:500;cursor:pointer;
-  letter-spacing:.4px;transition:color .2s;background:none;border:none;font-family:'DM Sans',sans-serif}
-nav a:hover,nav a.on{color:var(--txt)}
-.hdr-r{display:flex;align-items:center;gap:12px}
-.sw{position:relative;display:flex;align-items:center}
-#si{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;
-  padding:9px 38px 9px 14px;color:var(--txt);font-family:'DM Sans',sans-serif;
-  font-size:13px;width:220px;outline:none;transition:all .3s}
-#si::placeholder{color:rgba(240,236,228,.28)}
-#si:focus{width:255px;background:rgba(255,255,255,.09);border-color:rgba(229,9,20,.5);
-  box-shadow:0 0 0 3px rgba(229,9,20,.11)}
-.si-btn{position:absolute;right:9px;background:none;border:none;color:var(--muted);
-  cursor:pointer;display:grid;place-items:center;transition:color .2s;padding:0}
-.si-btn:hover{color:var(--red)}
-/* HERO */
-.hero{position:relative;height:88vh;min-height:520px;overflow:hidden;display:flex;
-  align-items:flex-end;padding:0 48px 64px}
-.hbg{position:absolute;inset:0;
-  background:linear-gradient(135deg,rgba(229,9,20,.17) 0%,transparent 55%),
-  radial-gradient(ellipse 80% 70% at 70% 20%,rgba(229,9,20,.09),transparent 60%),
-  linear-gradient(180deg,#0d0d0d,#050505)}
-.pw{position:absolute;inset:0;display:flex;gap:14px;padding:14px;opacity:.17;overflow:hidden;pointer-events:none}
-.pwc{display:flex;flex-direction:column;gap:14px;flex-shrink:0;width:148px;animation:drift 22s linear infinite}
-.pwc:nth-child(2){animation-duration:28s;animation-delay:-7s}
-.pwc:nth-child(3){animation-duration:20s;animation-delay:-13s}
-.pwc:nth-child(4){animation-duration:32s;animation-delay:-4s}
-.pwc:nth-child(5){animation-duration:18s;animation-delay:-10s}
-.pwc:nth-child(6){animation-duration:25s;animation-delay:-17s}
-@keyframes drift{from{transform:translateY(0)}to{transform:translateY(-50%)}}
-.pwcard{width:148px;height:218px;border-radius:10px;flex-shrink:0;overflow:hidden;background:rgba(255,255,255,.04)}
-.pwcard img{width:100%;height:100%;object-fit:cover}
-.hfb{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 30%,rgba(8,8,8,.7) 65%,var(--bg) 100%)}
-.hfl{position:absolute;inset:0;background:linear-gradient(to right,var(--bg) 0%,rgba(8,8,8,.65) 30%,transparent 55%)}
-.hc{position:relative;z-index:2;max-width:580px}
-.hpill{display:inline-flex;align-items:center;gap:8px;background:rgba(229,9,20,.14);
-  border:1px solid rgba(229,9,20,.3);border-radius:100px;padding:5px 16px;font-size:11px;
-  font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:#ff7070;margin-bottom:22px;
-  animation:up .6s ease both}
-.dot{width:7px;height:7px;border-radius:50%;background:var(--red);animation:blink 1.4s ease infinite}
-@keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
-h1.ht{font-family:'Bebas Neue',sans-serif;font-size:clamp(56px,8vw,100px);letter-spacing:4px;
-  line-height:.92;margin-bottom:18px;animation:up .6s .1s ease both}
-h1.ht em{font-family:'Playfair Display',serif;color:var(--red);font-style:italic}
-.hd{font-size:15px;color:rgba(240,236,228,.48);max-width:400px;line-height:1.7;
-  margin-bottom:36px;animation:up .6s .2s ease both}
-.hbtns{display:flex;gap:12px;animation:up .6s .3s ease both}
-@keyframes up{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
-/* BUTTONS */
-.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:8px;
-  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .25s}
-.bred{background:var(--red);color:#fff;box-shadow:0 4px 28px rgba(229,9,20,.42)}
-.bred:hover{background:#f01020;transform:translateY(-2px);box-shadow:0 8px 36px rgba(229,9,20,.52)}
-.bgl{background:rgba(255,255,255,.07);color:var(--txt);border:1px solid rgba(255,255,255,.12)}
-.bgl:hover{background:rgba(255,255,255,.13);transform:translateY(-2px)}
-/* GENRE STRIP */
-.gstrip{display:flex;gap:10px;padding:26px 48px;overflow-x:auto;border-bottom:1px solid var(--border)}
-.gstrip::-webkit-scrollbar{display:none}
-.gbtn{flex-shrink:0;padding:8px 20px;border-radius:100px;font-size:12px;font-weight:600;
-  letter-spacing:.5px;cursor:pointer;border:1px solid rgba(255,255,255,.1);
-  background:rgba(255,255,255,.05);color:rgba(240,236,228,.55);transition:all .2s;text-transform:uppercase}
-.gbtn:hover,.gbtn.active{background:var(--red);border-color:var(--red);color:#fff;box-shadow:0 0 18px rgba(229,9,20,.32)}
-/* SECTIONS */
-.sec{padding:44px 48px 0}
-.sh{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:26px}
-.st{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--txt)}
-.st span{color:var(--red);margin-right:5px}
-.sm{font-size:12px;color:var(--red);cursor:pointer;display:flex;align-items:center;gap:4px;
-  transition:gap .2s;background:none;border:none;font-family:'DM Sans',sans-serif;font-weight:600}
-.sm:hover{gap:8px}
-/* FEATURED */
-.fg{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
-.fc{position:relative;border-radius:14px;overflow:hidden;cursor:pointer;height:195px;
-  background:var(--s2);transition:transform .3s,box-shadow .3s}
-.fc:hover{transform:translateY(-4px);box-shadow:0 24px 56px rgba(0,0,0,.6)}
-.fc img{width:100%;height:100%;object-fit:cover;opacity:.5;transition:opacity .3s}
-.fc:hover img{opacity:.68}
-.fo{position:absolute;inset:0;background:linear-gradient(135deg,rgba(8,8,8,.95) 0%,transparent 65%);
-  padding:22px;display:flex;flex-direction:column;justify-content:flex-end}
-.fgen{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--red);margin-bottom:5px}
-.ftit{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;margin-bottom:5px;line-height:1}
-.fmeta{display:flex;align-items:center;gap:10px;font-size:12px;color:rgba(240,236,228,.48)}
-.frat{color:var(--gold);font-weight:600}
-/* MOVIE GRID */
-.mg{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:15px}
-/* MOVIE CARD */
-.mc{position:relative;border-radius:12px;overflow:hidden;cursor:pointer;background:var(--s2);
-  aspect-ratio:2/3;transition:transform .35s cubic-bezier(.25,.46,.45,.94),box-shadow .35s}
-.mc::before{content:'';position:absolute;inset:0;border-radius:12px;
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);z-index:3;pointer-events:none;transition:box-shadow .3s}
-.mc:hover{transform:scale(1.06) translateY(-5px);box-shadow:0 28px 64px rgba(0,0,0,.7)}
-.mc:hover::before{box-shadow:inset 0 0 0 1.5px rgba(229,9,20,.4)}
-.mc img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s}
-.mc:hover img{transform:scale(1.05)}
-.co{position:absolute;inset:0;z-index:2;background:linear-gradient(to top,rgba(8,8,8,.97) 0%,rgba(8,8,8,.5) 40%,transparent 70%);
-  opacity:0;transition:opacity .3s;display:flex;flex-direction:column;justify-content:flex-end;padding:13px 11px}
-.mc:hover .co{opacity:1}
-.ct{font-size:12px;font-weight:600;line-height:1.35;margin-bottom:5px}
-.cm{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted)}
-.cr{color:var(--gold);font-weight:700;display:flex;align-items:center;gap:2px}
-.pb{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(.65);width:50px;height:50px;
-  border-radius:50%;background:rgba(229,9,20,.9);display:grid;place-items:center;opacity:0;z-index:4;
-  transition:all .3s;box-shadow:0 0 30px rgba(229,9,20,.6)}
-.mc:hover .pb{opacity:1;transform:translate(-50%,-50%) scale(1)}
-.rn{position:absolute;bottom:-8px;left:-3px;z-index:1;font-family:'Bebas Neue',sans-serif;
-  font-size:90px;line-height:1;color:transparent;-webkit-text-stroke:2px rgba(255,255,255,.09);
-  pointer-events:none;transition:-webkit-text-stroke .3s}
-.mc:hover .rn{-webkit-text-stroke-color:rgba(229,9,20,.28)}
-.cb{position:absolute;top:10px;left:10px;z-index:5;font-size:9px;font-weight:700;
-  letter-spacing:1px;text-transform:uppercase;padding:3px 9px;border-radius:5px;color:#fff}
-.cb.top{background:#f5c518;color:#111}
-.cb.new{background:#00c573}
-/* MODAL */
-.mbg{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.88);
-  backdrop-filter:blur(10px);justify-content:center;align-items:center;padding:20px;animation:fi .2s ease}
-.mbg.open{display:flex}
-@keyframes fi{from{opacity:0}to{opacity:1}}
-.mbox{background:var(--s1);border-radius:18px;width:100%;max-width:780px;max-height:92vh;
-  overflow-y:auto;position:relative;border:1px solid rgba(255,255,255,.07);
-  box-shadow:0 50px 100px rgba(0,0,0,.85);animation:pi .32s cubic-bezier(.34,1.56,.64,1) both}
-@keyframes pi{from{opacity:0;transform:translateY(36px) scale(.96)}to{opacity:1;transform:none}}
-.mh{position:relative;height:270px;overflow:hidden;border-radius:18px 18px 0 0}
-.mhbi{position:absolute;inset:0;background-size:cover;background-position:center;filter:blur(2px);transform:scale(1.06)}
-.mhg{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(17,17,17,.15) 0%,rgba(17,17,17,.9) 75%,var(--s1) 100%)}
-.mhp{position:absolute;bottom:-34px;left:32px;width:112px;border-radius:10px;
-  box-shadow:0 20px 50px rgba(0,0,0,.7);border:2px solid rgba(255,255,255,.1)}
-.mcl{position:absolute;top:14px;right:14px;z-index:10;width:36px;height:36px;border-radius:50%;
-  background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.12);color:#fff;font-size:18px;
-  cursor:pointer;display:grid;place-items:center;transition:all .25s}
-.mcl:hover{background:var(--red);transform:rotate(90deg)}
-.mb{padding:52px 32px 32px 166px}
-.mtit{font-family:'Bebas Neue',sans-serif;font-size:38px;letter-spacing:2px;line-height:1;margin-bottom:11px}
-.mchips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
-.chip{display:inline-flex;align-items:center;gap:4px;padding:5px 13px;border-radius:100px;
-  font-size:12px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);color:rgba(240,236,228,.65)}
-.chip.gd{background:rgba(245,197,24,.1);border-color:rgba(245,197,24,.25);color:var(--gold);font-weight:700}
-.mgens{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
-.gtag{padding:5px 13px;border-radius:100px;font-size:11px;font-weight:600;letter-spacing:.4px;
-  text-transform:uppercase;background:rgba(229,9,20,.1);border:1px solid rgba(229,9,20,.25);color:#ff8888}
-.mplot{font-size:14px;line-height:1.8;color:rgba(240,236,228,.58);margin-bottom:24px}
-.cast-l{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
-.cast-w{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px}
-.cc{padding:5px 13px;border-radius:8px;background:var(--s2);border:1px solid var(--border);font-size:12px;color:rgba(240,236,228,.65)}
-.mact{display:flex;gap:11px}
-/* TOAST */
-.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(16px);
-  background:var(--s2);border:1px solid var(--border);border-radius:10px;
-  padding:11px 22px;font-size:13px;opacity:0;transition:all .3s;z-index:5000;
-  pointer-events:none;white-space:nowrap;box-shadow:0 8px 30px rgba(0,0,0,.5)}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-/* FOOTER */
-footer{margin-top:70px;padding:30px 48px;border-top:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between}
-.fl{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;color:rgba(240,236,228,.17)}
-.fl b{color:rgba(229,9,20,.4)}
-footer p{font-size:12px;color:rgba(240,236,228,.18)}
-::-webkit-scrollbar{width:4px}
-::-webkit-scrollbar-track{background:var(--bg)}
-::-webkit-scrollbar-thumb{background:rgba(229,9,20,.4);border-radius:4px}
-::-webkit-scrollbar-thumb:hover{background:var(--red)}
-@media(max-width:768px){
-  header{padding:0 18px}nav{display:none}
-  .hero{padding:0 18px 42px;height:auto;min-height:400px}
-  .gstrip{padding:18px}.sec{padding:28px 18px 0}
-  .mg{grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:11px}
-  .fg{grid-template-columns:1fr}.mb{padding:46px 18px 22px 18px}.mhp{display:none}
-  footer{flex-direction:column;gap:10px;text-align:center;padding:22px 18px}
-}
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --card: #16161f;
+    --border: rgba(255,255,255,0.07);
+    --accent: #e8c84a;
+    --accent2: #ff5e3a;
+    --accent3: #4af0c8;
+    --text: #f0ede8;
+    --muted: #6b6880;
+    --glow: rgba(232,200,74,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 3rem;
+    background: linear-gradient(to bottom, rgba(10,10,15,0.95), transparent);
+    backdrop-filter: blur(12px);
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-shadow: 0 0 30px rgba(232,200,74,0.4);
+  }
+
+  .logo span { color: var(--text); }
+
+  nav ul {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+
+  nav ul li a {
+    text-decoration: none;
+    color: var(--muted);
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    transition: color 0.3s;
+  }
+
+  nav ul li a:hover { color: var(--accent); }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .nav-btn {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    padding: 0.5rem 1.4rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .nav-btn:hover {
+    background: var(--text);
+    box-shadow: 0 0 20px var(--glow);
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 3rem 6rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 60% 30%, rgba(232,200,74,0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 80% at 80% 60%, rgba(255,94,58,0.05) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 60% at 20% 80%, rgba(74,240,200,0.04) 0%, transparent 60%);
+  }
+
+  .hero-film-strip {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 55%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .film-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    padding: 2rem;
+    height: 100%;
+    transform: skewX(-3deg) translateX(5%);
+    opacity: 0.7;
+    animation: filmFloat 8s ease-in-out infinite;
+  }
+
+  @keyframes filmFloat {
+    0%, 100% { transform: skewX(-3deg) translateX(5%) translateY(0); }
+    50% { transform: skewX(-3deg) translateX(5%) translateY(-12px); }
+  }
+
+  .film-card {
+    border-radius: 4px;
+    overflow: hidden;
+    aspect-ratio: 2/3;
+    position: relative;
+  }
+
+  .film-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: saturate(0.6) brightness(0.7);
+    transition: all 0.5s;
+  }
+
+  .film-card:hover img {
+    filter: saturate(1) brightness(1);
+    transform: scale(1.05);
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, var(--bg) 35%, transparent 70%),
+                linear-gradient(to top, var(--bg) 10%, transparent 40%);
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 620px;
+  }
+
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(232,200,74,0.1);
+    border: 1px solid rgba(232,200,74,0.3);
+    color: var(--accent);
+    padding: 0.35rem 1rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .hero-tag::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  .hero h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(4rem, 8vw, 8rem);
+    line-height: 0.9;
+    letter-spacing: 0.02em;
+    margin-bottom: 1.5rem;
+    animation: fadeUp 0.8s 0.1s ease both;
+  }
+
+  .hero h1 em {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    color: var(--accent);
+    display: block;
+    line-height: 1.1;
+  }
+
+  .hero p {
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.7;
+    max-width: 420px;
+    margin-bottom: 2.5rem;
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* SEARCH */
+  .search-bar {
+    display: flex;
+    gap: 0;
+    max-width: 540px;
+    animation: fadeUp 0.8s 0.3s ease both;
+  }
+
+  .search-bar input {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-right: none;
+    color: var(--text);
+    padding: 1rem 1.5rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: all 0.3s;
+  }
+
+  .search-bar input::placeholder { color: var(--muted); }
+  .search-bar input:focus {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(232,200,74,0.4);
+    box-shadow: 0 0 0 1px rgba(232,200,74,0.1);
+  }
+
+  .search-bar button {
+    background: var(--accent);
+    border: 1px solid var(--accent);
+    color: var(--bg);
+    padding: 1rem 2rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .search-bar button:hover {
+    background: var(--text);
+    border-color: var(--text);
+  }
+
+  /* MOOD FILTER */
+  .mood-section {
+    padding: 5rem 3rem 2rem;
+    animation: fadeUp 0.8s 0.4s ease both;
+  }
+
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .section-label span {
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+    max-width: 80px;
+  }
+
+  .moods {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .mood-pill {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 0.5rem 1.25rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.25s;
+    border-radius: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .mood-pill:hover, .mood-pill.active {
+    background: rgba(232,200,74,0.08);
+    border-color: rgba(232,200,74,0.5);
+    color: var(--accent);
+  }
+
+  .mood-pill .mood-icon { font-size: 1rem; }
+
+  /* FEATURED */
+  .featured-section {
+    padding: 3rem;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem;
+    letter-spacing: 0.05em;
+    line-height: 1;
+  }
+
+  .section-title span {
+    color: var(--accent);
+  }
+
+  .see-all {
+    color: var(--muted);
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: none;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .see-all:hover { color: var(--accent); }
+  .see-all::after { content: '→'; }
+
+  /* MOVIE GRID */
+  .movies-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .movie-card {
+    position: relative;
+    cursor: pointer;
+    group: true;
+  }
+
+  .movie-poster {
+    aspect-ratio: 2/3;
+    overflow: hidden;
+    position: relative;
+    background: var(--card);
+  }
+
+  .movie-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    filter: saturate(0.85);
+  }
+
+  .movie-card:hover .movie-poster img {
+    transform: scale(1.06);
+    filter: saturate(1.1);
+  }
+
+  .movie-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(10,10,15,0.95) 0%, rgba(10,10,15,0.2) 50%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.4s;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 1.25rem;
+  }
+
+  .movie-card:hover .movie-overlay { opacity: 1; }
+
+  .movie-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    transform: translateY(10px);
+    transition: transform 0.4s;
+  }
+
+  .movie-card:hover .movie-actions { transform: translateY(0); }
+
+  .action-btn {
+    flex: 1;
+    background: rgba(232,200,74,0.15);
+    border: 1px solid rgba(232,200,74,0.4);
+    color: var(--accent);
+    padding: 0.5rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.25s;
+    font-weight: 500;
+  }
+
+  .action-btn:hover {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  .action-btn.secondary {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.15);
+    color: var(--muted);
+  }
+
+  .action-btn.secondary:hover {
+    background: rgba(255,255,255,0.1);
+    color: var(--text);
+  }
+
+  .movie-badge {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    background: var(--accent2);
+    color: white;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.6rem;
+    font-weight: 500;
+  }
+
+  .movie-score {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: rgba(10,10,15,0.85);
+    border: 1px solid rgba(232,200,74,0.3);
+    color: var(--accent);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    width: 2.2rem;
+    height: 2.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0.05em;
+  }
+
+  .movie-info {
+    padding: 0.875rem 0 0;
+  }
+
+  .movie-title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .movie-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--muted);
+    font-size: 0.72rem;
+  }
+
+  .movie-meta .dot { width: 3px; height: 3px; background: var(--muted); border-radius: 50%; }
+
+  .movie-genre {
+    color: var(--accent3);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* FEATURED BIG CARD */
+  .featured-hero {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 0;
+    background: var(--card);
+    border: 1px solid var(--border);
+    margin-bottom: 3rem;
+    overflow: hidden;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .featured-poster {
+    aspect-ratio: 2/3;
+    overflow: hidden;
+    max-height: 380px;
+  }
+
+  .featured-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: saturate(0.8);
+    transition: all 0.5s;
+  }
+
+  .featured-hero:hover .featured-poster img {
+    transform: scale(1.05);
+    filter: saturate(1);
+  }
+
+  .featured-info {
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .featured-info::before {
+    content: attr(data-year);
+    position: absolute;
+    right: -1rem;
+    bottom: -2rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 12rem;
+    color: rgba(255,255,255,0.02);
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .featured-tag {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .featured-tag::before {
+    content: '';
+    width: 20px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  .featured-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3rem;
+    letter-spacing: 0.05em;
+    line-height: 1;
+    margin-bottom: 1rem;
+  }
+
+  .featured-desc {
+    color: var(--muted);
+    font-size: 0.875rem;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+    max-width: 380px;
+  }
+
+  .featured-stats {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .stat-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .featured-buttons {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    padding: 0.875rem 2rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .btn-primary:hover {
+    background: var(--text);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 30px rgba(232,200,74,0.2);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 0.875rem 2rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .btn-ghost:hover {
+    color: var(--text);
+    border-color: rgba(255,255,255,0.2);
+  }
+
+  /* TRENDING ROW */
+  .trending-row {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    padding-bottom: 1rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .trending-row::-webkit-scrollbar { height: 3px; }
+  .trending-row::-webkit-scrollbar-track { background: transparent; }
+  .trending-row::-webkit-scrollbar-thumb { background: var(--border); }
+
+  .trending-item {
+    flex: 0 0 160px;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .trending-item .rank {
+    position: absolute;
+    bottom: -0.5rem;
+    left: -0.5rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 5rem;
+    color: var(--bg);
+    -webkit-text-stroke: 1px rgba(255,255,255,0.1);
+    line-height: 1;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .trending-item .t-poster {
+    aspect-ratio: 2/3;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .trending-item .t-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s;
+    filter: saturate(0.8);
+  }
+
+  .trending-item:hover .t-poster img {
+    transform: scale(1.05);
+    filter: saturate(1);
+  }
+
+  .trending-item .t-info {
+    padding: 0.5rem 0 0 1rem;
+    position: relative;
+    z-index: 3;
+  }
+
+  .trending-item .t-title {
+    font-size: 0.78rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .trending-item .t-meta {
+    font-size: 0.68rem;
+    color: var(--muted);
+  }
+
+  /* AI MATCH */
+  .ai-section {
+    padding: 4rem 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ai-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 70% 60% at 50% 50%, rgba(74,240,200,0.04) 0%, transparent 70%);
+  }
+
+  .ai-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 3rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+    position: relative;
+  }
+
+  .ai-box::before {
+    content: 'AI';
+    position: absolute;
+    right: 2rem;
+    top: -2rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 8rem;
+    color: rgba(74,240,200,0.04);
+    pointer-events: none;
+  }
+
+  .ai-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent3);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .ai-label::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: var(--accent3);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--accent3);
+    animation: pulse 2s infinite;
+  }
+
+  .ai-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem;
+    letter-spacing: 0.05em;
+    margin-bottom: 1rem;
+  }
+
+  .ai-desc {
+    color: var(--muted);
+    font-size: 0.875rem;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+  }
+
+  .mood-selector {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .mood-opt {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.25s;
+    text-align: center;
+  }
+
+  .mood-opt:hover, .mood-opt.selected {
+    background: rgba(74,240,200,0.06);
+    border-color: rgba(74,240,200,0.3);
+    color: var(--accent3);
+  }
+
+  .mood-opt .mood-emoji { font-size: 1.5rem; display: block; margin-bottom: 0.25rem; }
+  .mood-opt .mood-text { font-size: 0.75rem; letter-spacing: 0.05em; }
+
+  .generate-btn {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--accent3);
+    color: var(--accent3);
+    padding: 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 1rem;
+  }
+
+  .generate-btn:hover {
+    background: rgba(74,240,200,0.1);
+    box-shadow: 0 0 20px rgba(74,240,200,0.1);
+  }
+
+  /* FOOTER */
+  footer {
+    padding: 3rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--muted);
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+  }
+
+  .footer-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.25rem;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+  }
+
+  /* ANIMATIONS */
+  .fade-in {
+    animation: fadeUp 0.7s ease both;
+  }
+
+  .stagger-1 { animation-delay: 0.1s; }
+  .stagger-2 { animation-delay: 0.2s; }
+  .stagger-3 { animation-delay: 0.3s; }
+  .stagger-4 { animation-delay: 0.4s; }
+
+  /* Loading shimmer */
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  .shimmer {
+    background: linear-gradient(90deg, var(--card) 25%, rgba(255,255,255,0.03) 50%, var(--card) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
 </style>
 </head>
 <body>
 
-<header>
-  <a class="logo" href="#">
-    <div class="logo-mark">🎬</div>
-    <span class="logo-name">Cine<b>Vault</b></span>
-  </a>
-  <nav>
-    <a class="on" onclick="showAll(this)">Discover</a>
-    <a onclick="showTop(this)">Top Rated</a>
-    <a onclick="showNew(this)">New Releases</a>
-    <a onclick="filterG('Action',this)">Action</a>
-    <a onclick="filterG('Drama',this)">Drama</a>
-  </nav>
-  <div class="hdr-r">
-    <div class="sw">
-      <input type="text" id="si" placeholder="Search movies…" oninput="lsearch(this.value)">
-      <button class="si-btn">
-        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      </button>
-    </div>
+<!-- NAV -->
+<nav>
+  <div class="logo">CINE<span>VERSE</span></div>
+  <ul>
+    <li><a href="#">Discover</a></li>
+    <li><a href="#">New Releases</a></li>
+    <li><a href="#">Collections</a></li>
+    <li><a href="#">Critics' Picks</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="nav-btn">Sign In</button>
   </div>
-</header>
+</nav>
 
+<!-- HERO -->
 <section class="hero">
-  <div class="hbg"></div>
-  <div class="pw" id="pw"></div>
-  <div class="hfb"></div>
-  <div class="hfl"></div>
-  <div class="hc">
-    <div class="hpill"><span class="dot"></span>Now Trending</div>
-    <h1 class="ht">Find Your<br>Next<br><em>Obsession</em></h1>
-    <p class="hd">Thousands of handpicked films across every genre. Discover what the world is watching.</p>
-    <div class="hbtns">
-      <button class="btn bred" onclick="document.getElementById('ms').scrollIntoView({behavior:'smooth'})">
-        <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-        Browse Films
-      </button>
-      <button class="btn bgl" onclick="openRandom()">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-        Surprise Me
-      </button>
+  <div class="hero-bg"></div>
+  <div class="hero-film-strip">
+    <div class="film-cards">
+      <!-- Colored placeholder posters using gradients -->
+      <div class="film-card"><div style="width:100%;height:100%;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);"></div></div>
+      <div class="film-card"><div style="width:100%;height:100%;background:linear-gradient(135deg,#2d1b69,#11998e,#38ef7d);"></div></div>
+      <div class="film-card"><div style="width:100%;height:100%;background:linear-gradient(135deg,#fc466b,#3f5efb);"></div></div>
+      <div class="film-card"><div style="width:100%;height:100%;background:linear-gradient(135deg,#4facfe,#00f2fe);"></div></div>
+      <div class="film-card"><div style="width:100%;height:100%;background:linear-gradient(135deg,#f093fb,#f5576c);"></div></div>
+      <div class="film-card"><div style="width:100%;height:100%;background:linear-gradient(135deg,#4e54c8,#8f94fb);"></div></div>
+      <div class="film-card"><div style="width:100%;height:100%;background:linear-gradient(135deg,#ffecd2,#fcb69f);"></div></div>
+      <div class="film-card"><div style="width:100%;height:100%;background:linear-gradient(135deg,#a18cd1,#fbc2eb);"></div></div>
+      <div class="film-card"><div style="width:100%;height:100%;background:linear-gradient(135deg,#fddb92,#d1fdff);"></div></div>
+    </div>
+  </div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-tag">AI-Powered Discovery</div>
+    <h1>YOUR NEXT<em>Obsession</em>AWAITS.</h1>
+    <p>Personalized film recommendations that learn your taste. Discover hidden gems, cult classics, and blockbusters you'll actually love.</p>
+    <div class="search-bar">
+      <input type="text" placeholder="Search by title, director, actor, or vibe…">
+      <button>Search</button>
     </div>
   </div>
 </section>
 
-<div class="gstrip" id="gs"></div>
-
-<section class="sec">
-  <div class="sh"><h2 class="st"><span>◈</span>EDITOR'S PICKS</h2><button class="sm">View all →</button></div>
-  <div class="fg" id="fg"></div>
+<!-- MOOD FILTER -->
+<section class="mood-section fade-in">
+  <div class="section-label">
+    <span>Filter by mood</span>
+  </div>
+  <div class="moods">
+    <button class="mood-pill active" onclick="toggleMood(this)"><span class="mood-icon">🌑</span> Dark & Gritty</button>
+    <button class="mood-pill" onclick="toggleMood(this)"><span class="mood-icon">😂</span> Feel Good</button>
+    <button class="mood-pill" onclick="toggleMood(this)"><span class="mood-icon">💀</span> Horror</button>
+    <button class="mood-pill" onclick="toggleMood(this)"><span class="mood-icon">🚀</span> Sci-Fi</button>
+    <button class="mood-pill" onclick="toggleMood(this)"><span class="mood-icon">❤️</span> Romance</button>
+    <button class="mood-pill" onclick="toggleMood(this)"><span class="mood-icon">🎭</span> Drama</button>
+    <button class="mood-pill" onclick="toggleMood(this)"><span class="mood-icon">🌀</span> Mind-Bending</button>
+    <button class="mood-pill" onclick="toggleMood(this)"><span class="mood-icon">🏆</span> Award Winners</button>
+    <button class="mood-pill" onclick="toggleMood(this)"><span class="mood-icon">🌍</span> World Cinema</button>
+  </div>
 </section>
 
-<section class="sec" id="ms">
-  <div class="sh"><h2 class="st" id="ml"><span>◈</span>TRENDING NOW</h2><button class="sm">View all →</button></div>
-  <div class="mg" id="mg"></div>
+<!-- FEATURED MOVIE -->
+<section class="featured-section">
+  <div class="section-header fade-in stagger-1">
+    <h2 class="section-title">EDITOR'S <span>PICK</span></h2>
+  </div>
+
+  <div class="featured-hero fade-in stagger-2" onclick="openModal()">
+    <div class="featured-poster">
+      <div style="width:100%;height:100%;background:linear-gradient(160deg,#0f0c29,#302b63,#24243e);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:5rem;color:rgba(255,255,255,0.05);letter-spacing:0.1em;">FILM</div>
+    </div>
+    <div class="featured-info" data-year="2001">
+      <div class="featured-tag">Editor's Pick — Sci-Fi Thriller</div>
+      <h2 class="featured-title">BLADE RUNNER 2049</h2>
+      <p class="featured-desc">A young blade runner's discovery of a long-buried secret leads him to track down former blade runner Rick Deckard, missing for thirty years. A visual masterpiece of neo-noir cinema.</p>
+      <div class="featured-stats">
+        <div class="stat">
+          <div class="stat-val">8.0</div>
+          <div class="stat-label">IMDb Score</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val">87%</div>
+          <div class="stat-label">Rotten Tomatoes</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val">164</div>
+          <div class="stat-label">Minutes</div>
+        </div>
+      </div>
+      <div class="featured-buttons">
+        <button class="btn-primary">▶ Watch Trailer</button>
+        <button class="btn-ghost">+ Watchlist</button>
+      </div>
+    </div>
+  </div>
 </section>
 
-<section class="sec">
-  <div class="sh"><h2 class="st"><span>◈</span>TOP RATED</h2><button class="sm">View all →</button></div>
-  <div class="mg" id="tg"></div>
+<!-- TRENDING -->
+<section class="featured-section" style="padding-top:0">
+  <div class="section-header fade-in">
+    <h2 class="section-title">TRENDING <span>NOW</span></h2>
+    <button class="see-all">View All</button>
+  </div>
+  <div class="trending-row fade-in stagger-1" id="trendingRow"></div>
 </section>
 
+<!-- RECOMMENDED -->
+<section class="featured-section" style="padding-top:2rem">
+  <div class="section-header fade-in">
+    <h2 class="section-title">RECOMMENDED <span>FOR YOU</span></h2>
+    <button class="see-all">View All</button>
+  </div>
+  <div class="movies-grid fade-in stagger-2" id="moviesGrid"></div>
+</section>
+
+<!-- AI MATCH -->
+<section class="ai-section">
+  <div class="ai-box fade-in">
+    <div>
+      <div class="ai-label">Powered by AI</div>
+      <h2 class="ai-title">FIND YOUR PERFECT MATCH</h2>
+      <p class="ai-desc">Tell us how you're feeling right now, and our AI will curate a personalized list of films that match your current mood — from our database of 50,000+ titles.</p>
+      <button class="generate-btn" onclick="generateRecs()">Generate Recommendations →</button>
+    </div>
+    <div>
+      <p style="font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;">How are you feeling?</p>
+      <div class="mood-selector">
+        <div class="mood-opt selected" onclick="selectMood(this)">
+          <span class="mood-emoji">😌</span>
+          <span class="mood-text">Relaxed</span>
+        </div>
+        <div class="mood-opt" onclick="selectMood(this)">
+          <span class="mood-emoji">🤔</span>
+          <span class="mood-text">Curious</span>
+        </div>
+        <div class="mood-opt" onclick="selectMood(this)">
+          <span class="mood-emoji">😢</span>
+          <span class="mood-text">Emotional</span>
+        </div>
+        <div class="mood-opt" onclick="selectMood(this)">
+          <span class="mood-emoji">⚡</span>
+          <span class="mood-text">Energized</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
 <footer>
-  <div class="fl">Cine<b>Vault</b></div>
-  <p>© 2025 CineVault · Demo Frontend</p>
+  <div class="footer-logo">CINEVERSE</div>
+  <div>© 2026 CineVerse. All rights reserved.</div>
+  <div style="display:flex;gap:2rem">
+    <span style="cursor:pointer;transition:color .3s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">Privacy</span>
+    <span style="cursor:pointer;transition:color .3s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">Terms</span>
+    <span style="cursor:pointer;transition:color .3s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">Contact</span>
+  </div>
 </footer>
 
-<div class="mbg" id="modal">
-  <div class="mbox" id="mbox">
-    <button class="mcl" onclick="closeModal()">✕</button>
-    <div id="mc2"></div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
 <script>
-const M=[
-  {id:1,t:"Inception",y:2010,r:8.8,g:["Sci-Fi","Thriller"],rt:"148 min",
-   plot:"A thief who steals corporate secrets through dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
-   cast:["Leonardo DiCaprio","Joseph Gordon-Levitt","Elliot Page","Tom Hardy"],badge:"top",
-   p:"https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg"},
-  {id:2,t:"The Dark Knight",y:2008,r:9.0,g:["Action","Drama"],rt:"152 min",
-   plot:"When the Joker wreaks havoc on Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
-   cast:["Christian Bale","Heath Ledger","Aaron Eckhart","Michael Caine"],badge:"top",
-   p:"https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_SX300.jpg"},
-  {id:3,t:"Interstellar",y:2014,r:8.7,g:["Sci-Fi","Adventure"],rt:"169 min",
-   plot:"A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival as Earth faces extinction.",
-   cast:["Matthew McConaughey","Anne Hathaway","Jessica Chastain","Michael Caine"],badge:"",
-   p:"https://m.media-amazon.com/images/M/MV5BZjdkOTU3MDktN2IxOS00OGEyLWFmMjktY2FiMmZkNWIyODZiXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_SX300.jpg"},
-  {id:4,t:"Parasite",y:2019,r:8.5,g:["Drama","Thriller"],rt:"132 min",
-   plot:"Greed and class discrimination threaten the symbiotic relationship between the wealthy Park family and the destitute Kim clan.",
-   cast:["Song Kang-ho","Lee Sun-kyun","Cho Yeo-jeong","Choi Woo-shik"],badge:"top",
-   p:"https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_SX300.jpg"},
-  {id:5,t:"The Shawshank Redemption",y:1994,r:9.3,g:["Drama"],rt:"142 min",
-   plot:"Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
-   cast:["Tim Robbins","Morgan Freeman","Bob Gunton","William Sadler"],badge:"top",
-   p:"https://m.media-amazon.com/images/M/MV5BNDE3ODcxYzMtY2YzZC00NiY2LTg3Y2ItZjQxZGZmNmUxNjZhXkEyXkFqcGdeQXVyNjAwNDUxODI@._V1_SX300.jpg"},
-  {id:6,t:"Pulp Fiction",y:1994,r:8.9,g:["Crime","Drama"],rt:"154 min",
-   plot:"The lives of two mob hitmen, a boxer, a gangster and his wife intertwine in four tales of violence and redemption.",
-   cast:["John Travolta","Uma Thurman","Samuel L. Jackson","Bruce Willis"],badge:"",
-   p:"https://m.media-amazon.com/images/M/MV5BNGNhMDIzZTUtNTBlZi00MTRlLWFjM2ItYzViMjE3YzI5MjljXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_SX300.jpg"},
-  {id:7,t:"Avengers: Endgame",y:2019,r:8.4,g:["Action","Sci-Fi"],rt:"181 min",
-   plot:"After the devastating events of Infinity War, the Avengers assemble once more to reverse Thanos's actions and restore balance to the universe.",
-   cast:["Robert Downey Jr.","Chris Evans","Mark Ruffalo","Chris Hemsworth"],badge:"",
-   p:"https://m.media-amazon.com/images/M/MV5BMTc5MDE2ODcwNV5BMl5BanBnXkFtZTgwMzI2NzQ2NzM@._V1_SX300.jpg"},
-  {id:8,t:"The Godfather",y:1972,r:9.2,g:["Crime","Drama"],rt:"175 min",
-   plot:"An organized crime dynasty's aging patriarch transfers control of his clandestine empire to his reluctant son.",
-   cast:["Marlon Brando","Al Pacino","James Caan","Diane Keaton"],badge:"top",
-   p:"https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_SX300.jpg"},
-  {id:9,t:"Oppenheimer",y:2023,r:8.5,g:["Drama","History"],rt:"180 min",
-   plot:"The story of J. Robert Oppenheimer and his role in the development of the atomic bomb during World War II.",
-   cast:["Cillian Murphy","Emily Blunt","Matt Damon","Robert Downey Jr."],badge:"new",
-   p:"https://m.media-amazon.com/images/M/MV5BMDBmYTZjNjUtN2M1MS00MTQ2LTk2ODgtNzc2M2QyZGE5NTVjXkEyXkFqcGdeQXVyNzAwMjU2MTY@._V1_SX300.jpg"},
-  {id:10,t:"Dune",y:2021,r:8.0,g:["Sci-Fi","Adventure"],rt:"155 min",
-   plot:"The son of a noble family is entrusted with the protection of the most valuable asset in the galaxy on the desert planet Arrakis.",
-   cast:["Timothée Chalamet","Rebecca Ferguson","Zendaya","Oscar Isaac"],badge:"new",
-   p:"https://m.media-amazon.com/images/M/MV5BN2FjNmEyNWMtYzM0ZS00NjIyLTg5YzYtYThlMGVjNzE1OGViXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_SX300.jpg"},
-  {id:11,t:"The Matrix",y:1999,r:8.7,g:["Sci-Fi","Action"],rt:"136 min",
-   plot:"A computer hacker learns that reality as he knows it is a simulation controlled by machines, and joins a rebellion to break free.",
-   cast:["Keanu Reeves","Laurence Fishburne","Carrie-Anne Moss","Hugo Weaving"],badge:"",
-   p:"https://m.media-amazon.com/images/M/MV5BNzQzOTk3OTAtNDQ0Zi00ZTVlLTM5YTctZjZiM2ZiNGViZWIzXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg"},
-  {id:12,t:"Whiplash",y:2014,r:8.5,g:["Drama","Music"],rt:"107 min",
-   plot:"A promising young drummer enrolls at a cut-throat music conservatory where an instructor will stop at nothing to realize a student's potential.",
-   cast:["Miles Teller","J.K. Simmons","Melissa Benoist","Paul Reiser"],badge:"",
-   p:"https://m.media-amazon.com/images/M/MV5BOTA5NDZlZGUtMjAxOS00YTRkLTkwYmMtYWQ0NWEwZDZiNjEzXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_SX300.jpg"},
-  {id:13,t:"Joker",y:2019,r:8.4,g:["Crime","Drama"],rt:"122 min",
-   plot:"In Gotham City, mentally troubled comedian Arthur Fleck embarks on a downward spiral of revolution and bloody crime.",
-   cast:["Joaquin Phoenix","Robert De Niro","Zazie Beetz","Frances Conroy"],badge:"",
-   p:"https://m.media-amazon.com/images/M/MV5BNGVjNWI4ZGUtNzE0MS00YTJmLWE0ZDctN2ZiYTk2YmI3NTYyXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_SX300.jpg"},
-  {id:14,t:"Barbie",y:2023,r:6.9,g:["Comedy","Fantasy"],rt:"114 min",
-   plot:"Barbie and Ken are living perfect lives in Barbie Land until a chance to go to the real world turns everything upside down.",
-   cast:["Margot Robbie","Ryan Gosling","America Ferrera","Kate McKinnon"],badge:"new",
-   p:"https://m.media-amazon.com/images/M/MV5BNjU3N2QxNzYtMjk1NC00MTc4LTk1NTQtMmUxNTljM2I0NDA5XkEyXkFqcGdeQXVyODE5NzE3OTE@._V1_SX300.jpg"},
-  {id:15,t:"Spider-Man: No Way Home",y:2021,r:8.2,g:["Action","Sci-Fi"],rt:"148 min",
-   plot:"With Spider-Man's identity revealed, Peter asks Doctor Strange for help. When a spell goes wrong, dangerous foes from other worlds appear.",
-   cast:["Tom Holland","Zendaya","Benedict Cumberbatch","Jacob Batalon"],badge:"",
-   p:"https://m.media-amazon.com/images/M/MV5BZWMyYzFjYTYtNTRjYi00OGExLWE2YzgtOGRmYjAxZTU3NzBiXkEyXkFqcGdeQXVyMzQ0MzA0NTM@._V1_SX300.jpg"},
-  {id:16,t:"Everything Everywhere All at Once",y:2022,r:7.8,g:["Sci-Fi","Comedy"],rt:"139 min",
-   plot:"A middle-aged Chinese immigrant must explore other universes and connect with the lives she could have lived to save existence itself.",
-   cast:["Michelle Yeoh","Stephanie Hsu","Ke Huy Quan","Jamie Lee Curtis"],badge:"new",
-   p:"https://m.media-amazon.com/images/M/MV5BYTdiOTIyZTQtNmQ1OS00NjZlLWIyMTgtYzk5Y2M3ZDVmMDk1XkEyXkFqcGdeQXVyMTAzMDg4NzU0._V1_SX300.jpg"},
+const gradients = [
+  'linear-gradient(135deg,#1a1a2e,#e94560)',
+  'linear-gradient(135deg,#0f3460,#533483)',
+  'linear-gradient(135deg,#16213e,#0f3460,#533483)',
+  'linear-gradient(135deg,#2d1b69,#11998e)',
+  'linear-gradient(135deg,#fc466b,#3f5efb)',
+  'linear-gradient(135deg,#4facfe,#00f2fe)',
+  'linear-gradient(135deg,#f093fb,#f5576c)',
+  'linear-gradient(135deg,#4e54c8,#8f94fb)',
+  'linear-gradient(135deg,#0a0a0f,#302b63)',
+  'linear-gradient(135deg,#23074d,#cc5333)',
+  'linear-gradient(135deg,#11998e,#38ef7d)',
+  'linear-gradient(135deg,#c62a87,#0d0d2b)',
 ];
-const GENRES=["All","Action","Drama","Sci-Fi","Thriller","Crime","Comedy","Adventure","History","Fantasy","Music"];
-const FT=[1,4,9,8];
-let WL=new Set();
 
-function init(){
-  buildPW();buildGS();buildFeat();
-  render(M,'mg');
-  render([...M].sort((a,b)=>b.r-a.r).slice(0,8),'tg');
-}
+const movies = [
+  { title: 'Dune: Part Two', year: 2024, genre: 'Sci-Fi', score: '8.5', badge: 'New' },
+  { title: 'Oppenheimer', year: 2023, genre: 'Drama', score: '8.3', badge: null },
+  { title: 'Parasite', year: 2019, genre: 'Thriller', score: '8.5', badge: null },
+  { title: 'The Substance', year: 2024, genre: 'Horror', score: '7.4', badge: 'Hot' },
+  { title: 'Poor Things', year: 2023, genre: 'Fantasy', score: '7.9', badge: null },
+  { title: 'Past Lives', year: 2023, genre: 'Romance', score: '7.9', badge: null },
+  { title: 'Aftersun', year: 2022, genre: 'Drama', score: '7.5', badge: null },
+  { title: 'Everything Everywhere', year: 2022, genre: 'Sci-Fi', score: '7.8', badge: null },
+];
 
-function buildPW(){
-  const w=document.getElementById('pw');
-  for(let c=0;c<6;c++){
-    const col=document.createElement('div');col.className='pwc';
-    const items=[...M,...M].slice(0,8);
-    items.forEach(m=>{
-      const d=document.createElement('div');d.className='pwcard';
-      d.innerHTML=`<img src="${m.p}" loading="lazy">`;col.appendChild(d);
-    });
-    col.innerHTML+=col.innerHTML;w.appendChild(col);
-  }
-}
+const trending = [
+  { title: 'Conclave', year: 2024, rank: 1 },
+  { title: 'The Brutalist', year: 2024, rank: 2 },
+  { title: 'Anora', year: 2024, rank: 3 },
+  { title: 'Nosferatu', year: 2024, rank: 4 },
+  { title: 'A Real Pain', year: 2024, rank: 5 },
+  { title: 'Flow', year: 2024, rank: 6 },
+];
 
-function buildGS(){
-  const s=document.getElementById('gs');
-  GENRES.forEach(g=>{
-    const b=document.createElement('button');b.className='gbtn'+(g==='All'?' active':'');
-    b.textContent=g;
-    b.onclick=()=>{
-      document.querySelectorAll('.gbtn').forEach(x=>x.classList.remove('active'));
-      b.classList.add('active');filterG(g);
-    };
-    s.appendChild(b);
-  });
-}
-
-function buildFeat(){
-  const g=document.getElementById('fg');
-  FT.forEach(id=>{
-    const m=M.find(x=>x.id===id);if(!m)return;
-    const d=document.createElement('div');d.className='fc';d.onclick=()=>openM(m);
-    d.innerHTML=`<img src="${m.p}" loading="lazy">
-      <div class="fo">
-        <div class="fgen">${m.g[0]}</div>
-        <div class="ftit">${m.t}</div>
-        <div class="fmeta"><span>${m.y}</span><span class="frat">⭐ ${m.r}</span><span>${m.rt}</span></div>
-      </div>`;
-    g.appendChild(d);
-  });
-}
-
-function render(movies,cid){
-  const g=document.getElementById(cid);g.innerHTML='';
-  if(!movies.length){
-    g.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--muted)">
-      <div style="font-size:44px;opacity:.35;margin-bottom:10px">🎞️</div>
-      <div style="font-family:'Bebas Neue';font-size:20px;letter-spacing:2px;color:rgba(240,236,228,.2)">No movies found</div></div>`;
-    return;
-  }
-  movies.forEach((m,i)=>{
-    const d=document.createElement('div');d.className='mc';
-    d.style.cssText='opacity:0;transform:translateY(14px)';
-    d.onclick=()=>openM(m);
-    d.innerHTML=`
-      <img src="${m.p}" loading="lazy">
-      <div class="pb"><svg width="15" height="15" fill="white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
-      <div class="co"><div class="ct">${m.t}</div>
-        <div class="cm"><span>${m.y}</span><span class="cr">⭐ ${m.r}</span></div></div>
-      ${i<5?`<div class="rn">${i+1}</div>`:''}
-      ${m.badge?`<div class="cb ${m.badge}">${m.badge==='new'?'🆕 New':'🏆 Top'}</div>`:''}`;
-    g.appendChild(d);
-    setTimeout(()=>{d.style.cssText='opacity:1;transform:translateY(0);transition:opacity .4s,transform .4s'},i*42);
-  });
-}
-
-function filterG(genre,navEl){
-  document.getElementById('ml').innerHTML=`<span>◈</span>${genre==='All'?'TRENDING NOW':genre.toUpperCase()+' MOVIES'}`;
-  const res=genre==='All'?M:M.filter(m=>m.g.includes(genre));
-  render(res,'mg');
-  document.getElementById('ms').scrollIntoView({behavior:'smooth'});
-  showToast(`${res.length} ${genre==='All'?'movies':genre} movies`);
-}
-
-function lsearch(q){
-  q=q.trim().toLowerCase();
-  if(!q){render(M,'mg');document.getElementById('ml').innerHTML='<span>◈</span>TRENDING NOW';return;}
-  const res=M.filter(m=>m.t.toLowerCase().includes(q)||m.g.some(x=>x.toLowerCase().includes(q))||m.y.toString().includes(q));
-  document.getElementById('ml').innerHTML=`<span>◈</span>RESULTS FOR "${q.toUpperCase()}"`;
-  render(res,'mg');
-  document.getElementById('ms').scrollIntoView({behavior:'smooth'});
-}
-
-function openM(m){
-  document.getElementById('mc2').innerHTML=`
-    <div class="mh">
-      <div class="mhbi" style="background-image:url('${m.p}')"></div>
-      <div class="mhg"></div>
-      <img class="mhp" src="${m.p}">
+function renderGrid() {
+  const grid = document.getElementById('moviesGrid');
+  grid.innerHTML = movies.map((m, i) => `
+    <div class="movie-card" onclick="showToast('${m.title}')">
+      <div class="movie-poster">
+        <div style="width:100%;height:100%;${gradients[i % gradients.length].replace('linear-gradient','background:linear-gradient')};display:flex;align-items:center;justify-content:center;"></div>
+        ${m.badge ? `<div class="movie-badge">${m.badge}</div>` : ''}
+        <div class="movie-score">${m.score}</div>
+        <div class="movie-overlay">
+          <div class="movie-actions">
+            <button class="action-btn" onclick="event.stopPropagation();showToast('Playing ${m.title}')">▶ Play</button>
+            <button class="action-btn secondary" onclick="event.stopPropagation();showToast('Added to watchlist')">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="movie-info">
+        <div class="movie-title">${m.title}</div>
+        <div class="movie-meta">
+          <span>${m.year}</span>
+          <span class="dot"></span>
+          <span class="movie-genre">${m.genre}</span>
+        </div>
+      </div>
     </div>
-    <div class="mb">
-      <h2 class="mtit">${m.t}</h2>
-      <div class="mchips">
-        <span class="chip">📅 ${m.y}</span>
-        <span class="chip gd">⭐ ${m.r} / 10</span>
-        <span class="chip">⏱ ${m.rt}</span>
-      </div>
-      <div class="mgens">${m.g.map(x=>`<span class="gtag">${x}</span>`).join('')}</div>
-      <p class="mplot">${m.plot}</p>
-      <div class="cast-l">Cast</div>
-      <div class="cast-w">${m.cast.map(c=>`<span class="cc">${c}</span>`).join('')}</div>
-      <div class="mact">
-        <button class="btn bred">
-          <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Watch Now
-        </button>
-        <button class="btn bgl" id="wlb-${m.id}" onclick="toggleWL(${m.id},'${m.t.replace(/'/g,"\\'")}')">
-          ${WL.has(m.id)?'✓ Saved':'+ Watchlist'}
-        </button>
-        <button class="btn bgl" onclick="closeModal()">Close</button>
-      </div>
-    </div>`;
-  document.getElementById('modal').classList.add('open');
-  document.body.style.overflow='hidden';
+  `).join('');
 }
 
-function closeModal(){
-  document.getElementById('modal').classList.remove('open');
-  document.body.style.overflow='';
+function renderTrending() {
+  const row = document.getElementById('trendingRow');
+  row.innerHTML = trending.map((t, i) => `
+    <div class="trending-item" onclick="showToast('${t.title}')">
+      <div class="t-poster">
+        <div style="width:100%;height:100%;${gradients[(i+4) % gradients.length].replace('linear-gradient','background:linear-gradient')};"></div>
+      </div>
+      <div class="rank">${t.rank}</div>
+      <div class="t-info">
+        <div class="t-title">${t.title}</div>
+        <div class="t-meta">${t.year}</div>
+      </div>
+    </div>
+  `).join('');
 }
 
-document.getElementById('modal').addEventListener('click',e=>{
-  if(e.target===document.getElementById('modal'))closeModal();
+function toggleMood(el) {
+  document.querySelectorAll('.mood-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function selectMood(el) {
+  document.querySelectorAll('.mood-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function generateRecs() {
+  showToast('✨ Generating your personalized picks…');
+}
+
+function openModal() {
+  showToast('Opening Blade Runner 2049…');
+}
+
+let toastTimeout;
+function showToast(msg) {
+  let toast = document.getElementById('toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toast';
+    toast.style.cssText = `
+      position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);
+      background:var(--card);border:1px solid var(--border);color:var(--text);
+      padding:0.75rem 2rem;font-size:0.8rem;letter-spacing:0.05em;
+      z-index:9998;opacity:0;transition:all 0.3s;pointer-events:none;
+      font-family:'DM Sans',sans-serif;
+    `;
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.opacity = '1';
+  toast.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(-50%) translateY(20px)';
+  }, 2500);
+}
+
+// Intersection Observer for fade-ins
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.style.opacity = '1'; e.target.style.transform = 'translateY(0)'; }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.fade-in').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(20px)';
+  el.style.transition = 'opacity 0.7s ease, transform 0.7s ease';
+  obs.observe(el);
 });
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 
-function toggleWL(id,title){
-  WL.has(id)?WL.delete(id):WL.add(id);
-  const b=document.getElementById(`wlb-${id}`);
-  if(b)b.textContent=WL.has(id)?'✓ Saved':'+ Watchlist';
-  showToast(WL.has(id)?`Added "${title}" 🎬`:`Removed "${title}"`);
-}
-
-function openRandom(){
-  const m=M[Math.floor(Math.random()*M.length)];
-  openM(m);showToast(`🎲 Random: ${m.t}`);
-}
-
-function showAll(el){setNav(el);render(M,'mg');document.getElementById('ml').innerHTML='<span>◈</span>TRENDING NOW';document.getElementById('ms').scrollIntoView({behavior:'smooth'});}
-function showTop(el){setNav(el);const s=[...M].sort((a,b)=>b.r-a.r);document.getElementById('ml').innerHTML='<span>◈</span>TOP RATED';render(s,'mg');document.getElementById('ms').scrollIntoView({behavior:'smooth'});}
-function showNew(el){setNav(el);const n=M.filter(m=>m.badge==='new');document.getElementById('ml').innerHTML='<span>◈</span>NEW RELEASES';render(n,'mg');document.getElementById('ms').scrollIntoView({behavior:'smooth'});}
-function setNav(el){document.querySelectorAll('nav a').forEach(a=>a.classList.remove('on'));if(el)el.classList.add('on');}
-
-let tt;
-function showToast(msg){
-  const e=document.getElementById('toast');e.textContent=msg;e.classList.add('show');
-  clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('show'),2600);
-}
-
-window.onload=init;
+renderGrid();
+renderTrending();
 </script>
 </body>
 </html>
