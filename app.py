@@ -1,7 +1,6 @@
 import streamlit as st
 import requests
 
-
 BACKEND_URL = "https://your-backend-name.onrender.com"
 
 st.set_page_config(
@@ -10,7 +9,29 @@ st.set_page_config(
     layout="wide"
 )
 
+def safe_request(url, params=None):
+    try:
+        res = requests.get(url, params=params, timeout=15)
 
+        if res.status_code != 200:
+            st.error(f"Backend error: {res.status_code}")
+            st.write(res.text)
+            return None
+
+        try:
+            return res.json()
+        except:
+            st.error("Invalid JSON response from backend")
+            st.write(res.text)
+            return None
+
+    except requests.exceptions.RequestException as e:
+        st.error("Backend not reachable.")
+        st.write(str(e))
+        return None
+
+
+# ---------- UI ----------
 st.markdown("""
 <style>
 body {
@@ -37,26 +58,17 @@ h1, h2, h3, h4 {
 </style>
 """, unsafe_allow_html=True)
 
-
 st.markdown("<h1 style='color:#E50914;'>🎬 Movie Recommender</h1>", unsafe_allow_html=True)
 st.markdown("<p style='color:white;'>Discover movies Netflix-style</p>", unsafe_allow_html=True)
-
 
 query = st.text_input("Search for a movie")
 
 if query:
     with st.spinner("Searching..."):
-        try:
-            res = requests.get(
-                f"{BACKEND_URL}/search",
-                params={"query": query},
-                timeout=10,
-            )
-        except:
-            st.error("Backend not running.")
-            st.stop()
-
-    movies = res.json()
+        movies = safe_request(
+            f"{BACKEND_URL}/search",
+            params={"query": query}
+        )
 
     if not movies:
         st.warning("No movies found.")
@@ -73,15 +85,19 @@ if query:
                     st.image(movie["Poster"], use_column_width=True)
 
                 st.markdown(
-                    f"<p style='color:white; text-align:center;'><b>{movie['Title']}</b></p>",
+                    f"<p style='color:white; text-align:center;'><b>{movie.get('Title')}</b></p>",
                     unsafe_allow_html=True
                 )
 
-                if st.button("View", key=movie["imdbID"]):
-                    details = requests.get(
-                        f"{BACKEND_URL}/movie/{movie['imdbID']}",
-                        timeout=10,
-                    ).json()
+                if st.button("View", key=movie.get("imdbID", f"{i}")):
+
+                    details = safe_request(
+                        f"{BACKEND_URL}/movie/{movie.get('imdbID')}"
+                    )
+
+                    if not details:
+                        continue
+
                     st.markdown("---")
                     st.markdown(
                         f"<h2 style='color:white;'>{details.get('Title')}</h2>",
@@ -91,7 +107,7 @@ if query:
                     col1, col2 = st.columns([1, 2])
 
                     with col1:
-                        if details.get("Poster") != "N/A":
+                        if details.get("Poster") and details.get("Poster") != "N/A":
                             st.image(details["Poster"])
 
                     with col2:
@@ -102,19 +118,19 @@ if query:
 
                     st.markdown("## 🤖 Recommended For You")
 
-                    recs = requests.get(
+                    recs = safe_request(
                         f"{BACKEND_URL}/recommend",
-                        params={"title": details.get("Title")},
-                        timeout=10,
-                    ).json()
+                        params={"title": details.get("Title")}
+                    )
 
-                    rec_cols = st.columns(5)
+                    if recs:
+                        rec_cols = st.columns(5)
 
-                    for j, rec in enumerate(recs):
-                        with rec_cols[j % 5]:
-                            st.markdown(
-                                f"<p style='color:white; text-align:center;'>{rec}</p>",
-                                unsafe_allow_html=True
-                            )
+                        for j, rec in enumerate(recs):
+                            with rec_cols[j % 5]:
+                                st.markdown(
+                                    f"<p style='color:white; text-align:center;'>{rec}</p>",
+                                    unsafe_allow_html=True
+                                )
 
                 st.markdown("</div>", unsafe_allow_html=True)
