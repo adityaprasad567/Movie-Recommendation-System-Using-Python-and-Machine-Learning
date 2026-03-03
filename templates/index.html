@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Movie Recommender</title>
+    <style>
+        body {
+            background-color: #141414;
+            color: white;
+            font-family: Arial;
+        }
+        .movie-card {
+            width: 200px;
+            margin: 10px;
+            display: inline-block;
+        }
+        img {
+            width: 100%;
+            border-radius: 10px;
+        }
+        input {
+            padding: 10px;
+            width: 300px;
+        }
+        button {
+            padding: 10px;
+            background-color: #E50914;
+            color: white;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+<h1 style="color:#E50914;">🎬 Movie Recommender</h1>
+
+<input type="text" id="searchInput" placeholder="Search movie">
+<button onclick="searchMovie()">Search</button>
+
+<div id="results"></div>
+
+<script>
+async function searchMovie() {
+    let query = document.getElementById("searchInput").value;
+    let res = await fetch(`/search?query=${query}`);
+    let data = await res.json();
+
+    let resultsDiv = document.getElementById("results");
+    resultsDiv.innerHTML = "";
+
+    data.forEach(movie => {
+        resultsDiv.innerHTML += `
+            <div class="movie-card">
+                <img src="${movie.Poster}" />
+                <p>${movie.Title}</p>
+            </div>
+        `;
+    });
+}
+</script>
+
+</body>
+</html>
